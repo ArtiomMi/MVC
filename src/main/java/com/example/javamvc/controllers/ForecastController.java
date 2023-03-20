@@ -1,25 +1,101 @@
-package com.example.javamvc.controllers;
 
+
+
+package com.example.javamvc.controllers;
+import com.example.javamvc.models.ForecastModel;
+import com.example.javamvc.models.IndexModel;
+import com.example.javamvc.models.Place;
+import com.example.javamvc.models.Root;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 @Controller
 public class ForecastController {
 
+
     @GetMapping("/")
-    public ModelAndView index() {
+    public ModelAndView index(@RequestParam(required = false) String cityCode) throws IOException {
         var modelAndView = new ModelAndView("index");
+        var indexModel = new IndexModel();
 
-        var cities = new ArrayList<String>();
-        cities.add("Vilnius");
-        cities.add("Kaunas");
+        ArrayList<Place> cities = getCities();
+        indexModel.cities = cities;
 
-        modelAndView.addObject("cities", cities);
+        if(cityCode != null && !cityCode.equals("")) {
+            ArrayList<ForecastModel> forecasts = getForecastModels(cityCode);
+            indexModel.forecasts = forecasts;
+        }
+        if (cityCode =="") {
+            cityCode = null;
+        }
+        indexModel.currentCityCode = cityCode;
 
+        modelAndView.addObject("IndexModel", indexModel);
         return  modelAndView;
     }
+    private static ArrayList<Place> getCities() throws IOException {
+        var cities = new ArrayList<Place>();
+
+        var json = loadDataJson("https://api.meteo.lt/v1/places");
+
+        ObjectMapper om = new ObjectMapper();
+        Place[] places = om.readValue(json, Place[].class);
+
+        for (var place :  places) {
+            var p = new Place();
+            p.code = place.code;
+            p.name = place.name;
+            cities.add(place);
+        }
+
+        return cities;
+    }
+    private static ArrayList<ForecastModel> getForecastModels(String cityCode) throws IOException {
+        var forecasts = new ArrayList<ForecastModel>();
+
+        var json = loadDataJson("https://api.meteo.lt/v1/places/" + cityCode + "/forecasts/long-term");
+        Root obj = createObj(json);
+
+        for(var stamp : obj.forecastTimestamps) {
+            var forecast = new ForecastModel(stamp.forecastTimeUtc, stamp.airTemperature);
+            forecasts.add(forecast);
+        }
+
+        return forecasts;
+
+    }
+
+    private static Root createObj(String json) throws JsonProcessingException {
+        ObjectMapper om = new ObjectMapper();
+        Root obj = om.readValue(json, Root.class);
+        return obj;
+    }
+
+    private static String loadDataJson(String apiUrl) throws  IOException {
+        URL url = new URL(apiUrl);
+
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.connect();
+
+
+        String text = "";
+        Scanner scanner = new Scanner(url.openStream());
+        while (scanner.hasNext()) {
+            text += scanner.nextLine();
+        }
+        scanner.close();
+        return text;
+    }
+
 
 }
