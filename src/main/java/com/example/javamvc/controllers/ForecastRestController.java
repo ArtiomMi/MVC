@@ -17,7 +17,7 @@ public class ForecastRestController {
         Forecast entity = new Forecast(
                 model.date,
                 String.valueOf(model.temperature),
-                "Vilnius",
+                model.city,
                 1);
         forecastRepository.save(entity);
 

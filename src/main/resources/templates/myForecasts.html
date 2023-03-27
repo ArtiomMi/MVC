@@ -13,21 +13,29 @@
 <header th:insert="blocks/header.html"></header>
 
 <form th:action="@{/logout}" method="post">
-    <input type="submit" value="Atsijungti"/>
+    <input type="submit"  value="Atsijungti"/>
 </form>
 
 <div class="container">
 <table id="myTable" class="table mt-3">
     <thead>
     <tr>
+        <th scope="col">Miestas</th>
         <th scope="col">Data</th>
         <th scope="col">Temperatura</th>
+        <th scope="col"></th>
     </tr>
     </thead>
     <tbody>
 <tr th:each="forecast : ${myForecasts}">
+    <td th:text="${forecast.city}"></td>
     <td th:text="${forecast.date}"></td>
     <td th:text="${forecast.temperature}"></td>
+    <td>
+        <button class="btn btn-warning">
+            <i class="bi bi-trash"></i> Istrinti
+        </button>
+    </td>
 </tr>
     </tbody>
 </table>

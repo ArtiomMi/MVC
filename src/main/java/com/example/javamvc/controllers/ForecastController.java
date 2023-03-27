@@ -6,12 +6,13 @@ import com.example.javamvc.models.Place;
 import com.example.javamvc.models.Root;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,6 +26,16 @@ public class ForecastController {
     public ModelAndView index(@RequestParam(required = false) String cityCode) throws IOException {
         var modelAndView = new ModelAndView("index");
         var indexModel = new IndexModel();
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        String userName;
+        if (principal instanceof UserDetails) {
+            userName = ((UserDetails)principal).getUsername();
+        } else {
+            userName = principal.toString();
+        }
+        indexModel.userName = userName;
 
         ArrayList<Place> cities = getCities();
         indexModel.cities = cities;
@@ -68,7 +79,7 @@ public class ForecastController {
         Root obj = createObj(json);
 
         for (var stamp : obj.forecastTimestamps) {
-            var forecast = new ForecastModel(stamp.forecastTimeUtc, stamp.airTemperature);
+            var forecast = new ForecastModel(cityCode, stamp.forecastTimeUtc, stamp.airTemperature);
             forecasts.add(forecast);
         }
 
