@@ -19,6 +19,8 @@
     </style>
 
 </head>
+<header th:insert="blocks/header.html"></header>
+
 <body>
 
 <div class="forecast-block container">
@@ -92,5 +94,6 @@
         el.parentElement.getElementsByClassName("ok")[0].style.display = "block";
     }
 </script>
+<footer th:insert="blocks/footer.html"></footer>
 </body>
 </html>

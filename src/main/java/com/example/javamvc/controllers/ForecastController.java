@@ -7,6 +7,7 @@ import com.example.javamvc.models.Root;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -39,7 +40,7 @@ public class ForecastController {
         indexModel.currentCityCode = cityCode;
 
         modelAndView.addObject("IndexModel", indexModel);
-        return  modelAndView;
+        return modelAndView;
     }
 
     private static ArrayList<Place> getCities() throws IOException {
@@ -50,7 +51,7 @@ public class ForecastController {
         ObjectMapper om = new ObjectMapper();
         Place[] places = om.readValue(json, Place[].class);
 
-        for (var place :  places) {
+        for (var place : places) {
             var p = new Place();
             p.code = place.code;
             p.name = place.name;
@@ -66,7 +67,7 @@ public class ForecastController {
         var json = loadDataJson("https://api.meteo.lt/v1/places/" + cityCode + "/forecasts/long-term");
         Root obj = createObj(json);
 
-        for (var stamp :  obj.forecastTimestamps) {
+        for (var stamp : obj.forecastTimestamps) {
             var forecast = new ForecastModel(stamp.forecastTimeUtc, stamp.airTemperature);
             forecasts.add(forecast);
         }
@@ -96,4 +97,6 @@ public class ForecastController {
 
         return text;
     }
+
+
 }
