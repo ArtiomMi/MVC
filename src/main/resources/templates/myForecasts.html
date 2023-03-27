@@ -12,6 +12,10 @@
 <body style="background-color: aquamarine">
 <header th:insert="blocks/header.html"></header>
 
+<form th:action="@{/logout}" method="post">
+    <input type="submit" value="Atsijungti"/>
+</form>
+
 <div class="container">
 <table id="myTable" class="table mt-3">
     <thead>
